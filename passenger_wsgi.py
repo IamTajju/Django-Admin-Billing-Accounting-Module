@@ -1,4 +1,4 @@
-# import os
-# import sys
+import os
+import sys
 
-# from core.wsgi import application
+from core.wsgi import application
