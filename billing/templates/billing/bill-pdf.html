@@ -1,0 +1,390 @@
+{% load static %}
+{% load mathfilters %}
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!-- <link rel="stylesheet" type="text/css" href="{% static 'billing/styles.css' %}"> -->
+    <link type="text/css" href="{% static 'billing/css/bootstrap.min.css' %}" rel="stylesheet">
+    <title>Invoice {{bill.get_invoice_number}}</title>
+    <meta name="description" content="Invoice demo sample">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+    </style>
+    <style>
+        html {
+            background: grey;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 12px;
+            background: white;
+            width: 21cm;
+            height: 29.7cm;
+            display: block;
+            /* padding: 1cm 0.5cm 1cm 0.5cm; */
+        }
+
+        @page {
+            font-family: 'Roboto', sans-serif;
+            font-size: 12px;
+            background: white;
+            width: 21cm;
+            height: 29.7cm;
+            display: block;
+            margin: 1cm 1.5cm 1cm 1.5cm;
+        }
+    </style>
+    <style>
+        .break-text {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-all;
+            display: inline-block;
+            max-width: 50ch;
+            /* Adjust this to your desired character count */
+        }
+    </style>
+</head>
+<div class="row gy-0 align-items-center justify-content-between">
+    <div class="col-9">
+        <div class="row gx-5 align-items-center justify-content-start">
+            <div class="col-8 ms-3">
+                <h4 class="fw-semibold mb-3">Billing & Account module</h4>
+                <p class="fw-light">
+                    924 West Uttara<br>
+                    Dhaka, Bangladesh<br>
+                    01686588048<br>
+                    www.tahzeebahmed.com<br>
+                    tahzeeb2g@gmail.com<br>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-3 text-end fw-light">
+        <strong class="fw-semibold">INVOICE</strong><br>
+        {{bill.get_invoice_number}}<br>
+        <br>
+        <strong class="fw-semibold">DATE</strong><br>
+        {{bill.date.date}}<br>
+        <br>
+        <strong class="fw-semibold">DUE</strong><br>
+        On Receipt<br>
+        <br>
+        <strong class="fw-semibold">BALANCE DUE</strong><br>
+        BDT {{bill.get_due}}
+    </div>
+</div>
+<hr>
+<div class="row justify-content-start align-items-start">
+    <div class="col">
+        <p class="fw-bolder">Bill To:</p>
+        <h5>{{bill.client.full_name}}</h5>
+        <span class="d-block">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-phone d-inline" viewBox="0 0 16 16">
+                <path
+                    d="M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H5z" />
+                <path d="M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+            </svg>
+            <p class="d-inline fw-light"> {{bill.client.phone_number}}</p>
+        </span>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col">
+        <table class="table table-striped-columns">
+            <thead>
+                <tr>
+                    <th scope="col">Description</th>
+                    <th scope="col">Rate</th>
+                    <th scope="col">Qty</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%if bill.is_custom_second %}
+                {% for purchase in bill.get_purchase_list %}
+                <tr style="{% if forloop.counter|divisibleby:2%} page-break-after: always; {%endif%}">
+                    <td>
+                        <!--Title-->
+                        <h6>{{purchase.package}}</h6>
+                        <p class="fw-light text-muted break-text">
+                            <!--Details-->
+                            {{purchase.package.details}}
+                            <br>
+                            <br>
+                            <!-- Cinematographers -->
+                            {% if purchase.package.num_cinematographer %}
+                            {{ purchase.package.num_cinematographer }} x Cinematographer{% if purchase.package.num_cinematographer > 1 %}s{% endif %}
+                            <br>
+                            {% endif %}
+                            <!-- Photographers -->
+                            {% if purchase.package.num_photographer %}
+                            {{ purchase.package.num_photographer }} x Photographer{% if purchase.package.num_photographer > 1 %}s{% endif %}
+                            <br>
+                            {% endif %}
+                            <!--Coverage-->
+                            <br>
+                            <strong>Coverage:</strong><br>
+                            {{purchase.package.get_coverage_display}} (Max {{purchase.package.time}} hrs)
+                            <br>
+                            <br>
+                            <!--Dates-->
+                            <strong>Event date(s)</strong>: <br>
+                            {{purchase.dates}}
+                            <br>
+                            <br>
+                            <!--Leads-->
+                            {% if purchase.leads.all|length > 0%}
+                            <br>
+                            <strong>Lead by</strong><br>
+                            {% for lead in purchase.leads.all %}
+                            {% if forloop.counter0 == 0 %}
+                            {{lead}}
+                            {% else %}
+                            & {{lead}}
+                            {% endif %}
+                            {% endfor %}
+                            <br>
+                            <br>
+                            {% endif %}
+                        </p>
+                    </td>
+                    <td>BDT {{purchase.package.budget}}</td>
+                    <td>{{purchase.quantity}}</td>
+                    <td>BDT {% widthratio purchase.package.budget 1 purchase.quantity %}</td>
+                </tr>
+                {% endfor %}
+                {% for custom_purchase in bill.get_custom_purchase_list %}
+                <tr style="{% if forloop.counter|divisibleby:2%} page-break-after: always; {%endif%}">
+                    <td>
+                        <!--Title-->
+                        <h6>Custom Package {{forloop.counter}}</h6>
+                        <p class="fw-light text-muted break-text">
+                            <!--Details-->
+                            {{custom_purchase.details|linebreaksbr}}
+                            <br>
+                            <br>
+                            <!--Dates-->
+                            <strong>Event date(s)</strong>: <br>
+                            {{custom_purchase.date}}
+                            <br>
+                            <br>
+                            <!--Leads-->
+                            {% if custom_purchase.leads.all|length > 0%}
+                            <br>
+                            <strong>Lead by</strong><br>
+                            {% for lead in custom_purchase.leads.all %}
+                            {% if forloop.counter0 == 0 %}
+                            {{lead}}
+                            {% else %}
+                            & {{lead}}
+                            {% endif %}
+                            {% endfor %}
+                            <br>
+                            <br>
+                            {% endif %}
+                        </p>
+                    </td>
+                    <td>BDT {{custom_purchase.price}}</td>
+                    <td>1</td>
+                    <td>BDT {{custom_purchase.price}}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                {% for custom_purchase in bill.get_custom_purchase_list %}
+                <tr style="{% if forloop.counter|divisibleby:2%} page-break-after: always; {%endif%}">
+                    <td>
+                        <!--Title-->
+                        <h6>Custom Package {{forloop.counter}}</h6>
+                        <p class="fw-light text-muted break-text">
+                            <!--Details-->
+                            {{custom_purchase.details|linebreaksbr}}
+                            <br>
+                            <br>
+                            <!--Dates-->
+                            <strong>Event date(s)</strong>: <br>
+                            {{custom_purchase.date}}
+                            <br>
+                            <br>
+                            <!--Leads-->
+                            {% if custom_purchase.leads.all|length > 0%}
+                            <br>
+                            <strong>Lead by</strong><br>
+                            {% for lead in custom_purchase.leads.all %}
+                            {% if forloop.counter0 == 0 %}
+                            {{lead}}
+                            {% else %}
+                            & {{lead}}
+                            {% endif %}
+                            {% endfor %}
+                            <br>
+                            <br>
+                            {% endif %}
+                        </p>
+                    </td>
+                    <td>BDT {{custom_purchase.price}}</td>
+                    <td>1</td>
+                    <td>BDT {{custom_purchase.price}}</td>
+                </tr>
+                {% endfor %}
+                {% for purchase in bill.get_purchase_list %}
+                <tr style="{% if forloop.counter|divisibleby:2%} page-break-after: always; {%endif%}">
+                    <td>
+                        <!--Title-->
+                        <h6>{{purchase.package}}</h6>
+                        <p class="fw-light text-muted break-text">
+                            <!--Details-->
+                            {{purchase.package.details}}
+                            <br>
+                            <br>
+                            <!-- Cinematographers -->
+                            {% if purchase.package.num_cinematographer%}
+                            {{ purchase.package.num_cinematographer }} x Cinematographer{% if purchase.package.num_cinematographer > 1 %}s{% endif %}
+                            <br>
+                            {% endif %}
+                            <!-- Photographers -->
+                            {% if purchase.package.num_photographer %}
+                            {{ purchase.package.num_photographer }} x Photographer{% if purchase.package.num_photographer > 1 %}s{% endif %}
+                            <br>
+                            {% endif %}
+                            <!--Coverage-->
+                            <br>
+                            <strong>Coverage:</strong><br>
+                            {{purchase.package.get_coverage_display}} (Max {{purchase.package.time}} hrs)
+                            <br>
+                            <br>
+                            <!--Dates-->
+                            <strong>Event date(s)</strong>: <br>
+                            {{purchase.dates}}
+                            <br>
+                            <br>
+                            <!--Leads-->
+                            {% if purchase.leads.all|length > 0%}
+                            <br>
+                            <strong>Lead by</strong><br>
+                            {% for lead in purchase.leads.all %}
+                            {% if forloop.counter0 == 0 %}
+                            {{lead}}
+                            {% else %}
+                            & {{lead}}
+                            {% endif %}
+                            {% endfor %}
+                            <br>
+                            <br>
+                            {% endif %}
+                        </p>
+                    </td>
+                    <td>BDT {{purchase.package.budget}}</td>
+                    <td>{{purchase.quantity}}</td>
+                    <td>BDT {% widthratio purchase.package.budget 1 purchase.quantity %}</td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+                {% if bill.get_add_ons_list|length > 0 %}
+                <tr>
+                    <td>Add Ons:</td>
+                </tr>
+                {% endif %}
+                <!--AddOns-->
+                {% for add_on in bill.get_add_ons_list %}
+                <tr>
+                    <td>
+                        <p class="fw-light text-muted">{{add_on.add_on}}</p>
+                    </td>
+                    <td>BDT {{add_on.add_on.price}}</td>
+                    <td>{{add_on.quantity}}</td>
+                    <td>BDT {% widthratio add_on.add_on.price 1 add_on.quantity %} </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row justify-content-between">
+    <div class="col-5 mt-5 pt-5">
+        <h5>Payment Info</h5>
+        <br>
+        <strong>PAYMENT INSTRUCTIONS</strong>
+        <p>You are requested to clear your dues after 1 week of the event to our bank account:</p>
+        <p>
+            ECB Bank<br>
+            A/c no. 0982108000006111<br>
+            A/c name: TAHZEEB AHMED<br>
+            Corporate Branch, Dhaka.<br>
+        </p>
+    </div>
+    <div class="col-5 mt-0 pt-0">
+        <div class="row align-items-start justify-content-between">
+            <div class="col text-start">
+                <strong>SUBTOTAL</strong>
+            </div>
+            <div class="col text-end">
+                BDT {{bill.get_subtotal}}
+            </div>
+        </div>
+        <div class="row align-items-start justify-content-between">
+            <div class="col text-start">
+                <strong>ADD ONS TOTAL</strong>
+            </div>
+            <div class="col text-end">
+                + BDT {{bill.get_add_ons_total}}
+            </div>
+        </div>
+        {% if bill.get_discount != 0 %}
+        <div class="row align-items-start justify-content-between">
+            <div class="col text-start">
+                <strong>DISCOUNT</strong>
+            </div>
+            <div class="col text-end">
+                - BDT {{bill.get_discount}}
+            </div>
+        </div>
+        {% endif %}
+        <hr>
+        <div class="row align-items-start justify-content-between">
+            <div class="col text-start">
+                <strong>TOTAL</strong>
+            </div>
+            <div class="col text-end">
+                BDT {{bill.get_total}}
+            </div>
+        </div>
+        <div class="row align-items-start justify-content-between">
+            <div class="col text-start">
+                <strong>PAID</strong>
+            </div>
+            <div class="col text-end">
+                BDT {{bill.get_paid}}
+                <br>
+                {% if bill.get_paid > 0 %}
+                <small class="text-muted">{{bill.date.date}}</small>
+                {% endif %}
+            </div>
+        </div>
+        <hr>
+        <div class="row align-items-start justify-content-between">
+            <div class="col text-start">
+                <strong>BALANCE DUE</strong>
+            </div>
+            <div class="col text-end">
+                <h4 class="fw-bold">BDT {{bill.get_due}}</h4>
+            </div>
+        </div>
+        <hr style="height:6px; border-top:1.5px solid #5d5d5d; border-bottom:1.5px solid #5d5d5d;">
+        <div class="row align-items-start justify-content-center">
+            <div class="col-9 text-center">
+                <img src="{% static 'billing/admin.png' %}" class="img-fluid">
+            </div>
+            <div class="col-12 text-center">
+                <strong>Partner, Billing & Accounting Module</strong>
+                <p class="text-muted">{{bill.date.date}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>
