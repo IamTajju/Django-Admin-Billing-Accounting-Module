@@ -15,6 +15,7 @@ from rest_framework import generics, authentication, permissions, viewsets
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from datetime import datetime, timedelta
 
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 
@@ -559,3 +560,57 @@ class CEARegistration(APIView):
         invoice_link = str(request.get_host()) + str(reverse("billing:view-bill", args=[
             client.generate_bill(User.objects.get(id=request.user.id))]))
         return Response({'invoice_link': invoice_link}, status=status.HTTP_201_CREATED)
+
+
+class LastYearFinancialSummary(APIView):
+    permission_classes = [permissions.DjangoModelPermissions]
+    authentication_classes = [authentication.SessionAuthentication]
+    queryset = Ledger.objects.all()
+
+    def get_month_name(self, month_number):
+        return datetime(2022, month_number, 1).strftime('%b')
+
+    def get_financial_data(self, month, year):
+        try:
+            ledger = Ledger.objects.get(month=month, year=year)
+            return {'revenue': ledger.revenue, 'profit': ledger.net_profit}
+        except Ledger.DoesNotExist:
+            return {'revenue': 0, 'profit': 0}  # Or provide default values
+
+    def get(self, request):
+
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+
+        last_12_months = [
+            (
+                self.get_month_name((current_month - x - 1) % 12 + 1),
+                (current_month - x - 1) % 12 + 1,
+                current_year if (current_month - x) > 0 else current_year - 1
+            )
+            for x in range(12)
+        ]
+
+        financial_data_list = [self.get_financial_data(
+            month=i[1], year=i[2]) for i in last_12_months]
+
+        revenue_list = [data['revenue']
+                        for data in financial_data_list]
+        total_revenue = sum(revenue_list)
+
+        growth_rates = [(revenue_list[i] - revenue_list[i - 1]) /
+                        revenue_list[i - 1] * 100 for i in range(1, len(revenue_list))]
+
+        # Calculate the average growth rate
+        average_growth_rate = sum(growth_rates) / len(growth_rates)
+
+        response_data = {
+            'last_12_months': [i[0] for i in last_12_months][::-1],
+            'revenue_list': revenue_list[::-1],
+            'profit_list': [data['profit'] for data in financial_data_list][::-1],
+            'total_revenue': total_revenue,
+            'average_growth_rate': average_growth_rate
+        }
+
+        return Response(response_data)
+

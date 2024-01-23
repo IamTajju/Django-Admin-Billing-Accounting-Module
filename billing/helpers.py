@@ -1,5 +1,7 @@
 import datetime
 from django.contrib.auth.models import Group
+
+
 def get_prev_month_year():
     date = datetime.date.today()
     prev_month = date.month - 1
@@ -17,3 +19,5 @@ def is_user_in_admin_group(user):
         return admin_group in user.groups.all()
     except Group.DoesNotExist:
         return False
+
+

@@ -27,4 +27,5 @@ urlpatterns = [
     path('ledger-tableview', views.LedgerTableView.as_view()),
     path('client-pending-payment', views.ClientPendingPayment.as_view()),
     path('cea-registration', views.CEARegistration.as_view()),
+    path('last-year-financial-summary', views.LastYearFinancialSummary.as_view())
 ]

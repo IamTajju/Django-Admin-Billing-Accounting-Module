@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'api',
     'user',
     'billing',
+    'admin_volt.apps.AdminVoltConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -70,7 +71,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'build')],
+        'DIRS': [os.path.join(BASE_DIR)],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -168,13 +169,13 @@ REST_FRAMEWORK = {
 
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://billing.odysseydev.net/',
+    'https://billing.odysseydev.net',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:8000',
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://billing.odysseydev.net/',
+    'https://billing.odysseydev.net',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:8000',
 ]
@@ -197,3 +198,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'build', 'media')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+LOGIN_REDIRECT_URL = '/'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

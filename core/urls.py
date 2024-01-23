@@ -16,11 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, include, re_path
-from billing.admin import admin_site
-from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('admin/', admin_site.urls),
+    path('', include('admin_volt.urls')),
+    path('admin/', admin.site.urls),
     path('billing/', include(('billing.urls', 'billing'), namespace='billing')),
     path('api-auth/', include('rest_framework.urls')),
     path('api/', include(('api.urls', 'api'), namespace='api')),
