@@ -16,10 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, include, re_path
+from admin_volt import views
+from .views import redirect_to_root
 
 urlpatterns = [
-    path('', include('admin_volt.urls')),
+    path('', views.dashboard, name='root'),
+    path('admin/', redirect_to_root, name='admin_redirect'),
     path('admin/', admin.site.urls),
+    path('volt/', include('admin_volt.urls')),
     path('billing/', include(('billing.urls', 'billing'), namespace='billing')),
     path('api-auth/', include('rest_framework.urls')),
     path('api/', include(('api.urls', 'api'), namespace='api')),

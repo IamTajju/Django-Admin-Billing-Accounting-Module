@@ -13,6 +13,7 @@ from billing.helpers import get_prev_month_year
 class Client(models.Model):
     full_name = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=15)
+    date_added = models.DateTimeField(auto_now_add=True)
 
     @classmethod
     def get_latest_pk(cls):

@@ -169,16 +169,11 @@ d.addEventListener("DOMContentLoaded", function (event) {
         });
     }
 
-    //Chartist
-
     if (d.querySelector('.ct-chart-sales-value')) {
         var apiEndpoint = origin + '/api/last-year-financial-summary'
         fetch(apiEndpoint)
             .then(response => response.json())
             .then(data => {
-                document.getElementById('total-revenue').innerText = '৳ ' + data.total_revenue.toLocaleString();
-                document.getElementById('average-growth-rate').innerText = data.average_growth_rate.toFixed(2) + '%';
-
                 new Chartist.Line('.ct-chart-sales-value', {
                     labels: data.last_12_months,
                     series: [
@@ -206,48 +201,145 @@ d.addEventListener("DOMContentLoaded", function (event) {
                         }
                     }
                 });
+                d.getElementById('total-revenue').innerText = '৳ ' + data.total_revenue.toLocaleString();
+                d.getElementById('average-growth-rate').innerText = data.average_growth_rate.toFixed(2) + '%';
+
+                if (d.querySelector('.ct-chart-ranking')) {
+
+                    var chart = new Chartist.Bar('.ct-chart-ranking', {
+                        labels: data.last_12_months,
+                        series: [
+                            data.revenue_list,
+                            data.advance_list,
+                        ]
+                    }, {
+                        low: 0,
+                        showArea: true,
+                        plugins: [
+                            Chartist.plugins.tooltip()
+                        ],
+                        axisX: {
+                            // On the x-axis start means top and end means bottom
+                            position: 'end'
+                        },
+                        axisY: {
+                            // On the y-axis start means left and end means right
+                            showGrid: false,
+                            showLabel: false,
+                            offset: 0
+                        }
+                    });
+
+                    chart.on('draw', function (data) {
+                        if (data.type === 'line' || data.type === 'area') {
+                            data.element.animate({
+                                d: {
+                                    begin: 2000 * data.index,
+                                    dur: 2000,
+                                    from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
+                                    to: data.path.clone().stringify(),
+                                    easing: Chartist.Svg.Easing.easeOutQuint
+                                }
+                            });
+                        }
+                    });
+
+                    d.getElementById('cash-in-hand').innerText = '৳ ' + data.cash_in_hand.toLocaleString();
+                    d.getElementById('net-profit').innerText = data.pct_net_profit.toFixed(2) + '%';
+                    d.getElementById('gross-profit').innerText = data.pct_gross_profit.toFixed(2) + '%';
+                    d.getElementById('account-receivables').innerText = data.pct_ac_receivables.toFixed(2) + '%';
+                }
+
             })
             .catch(error => console.error('Error fetching data:', error));
     }
 
-    if (d.querySelector('.ct-chart-ranking')) {
-        var chart = new Chartist.Bar('.ct-chart-ranking', {
-            labels: ['sun', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            series: [
-                [1, 5, 2, 5, 4, 3],
-                [2, 3, 4, 8, 1, 2],
-            ]
-        }, {
-            low: 0,
-            showArea: true,
-            plugins: [
-                Chartist.plugins.tooltip()
-            ],
-            axisX: {
-                // On the x-axis start means top and end means bottom
-                position: 'end'
-            },
-            axisY: {
-                // On the y-axis start means left and end means right
-                showGrid: false,
-                showLabel: false,
-                offset: 0
-            }
-        });
+    if (d.querySelector('.totals-col')) {
+        var apiEndpoint = origin + '/api/current-month-totals'
 
-        chart.on('draw', function (data) {
-            if (data.type === 'line' || data.type === 'area') {
-                data.element.animate({
-                    d: {
-                        begin: 2000 * data.index,
-                        dur: 2000,
-                        from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
-                        to: data.path.clone().stringify(),
-                        easing: Chartist.Svg.Easing.easeOutQuint
-                    }
+        fetch(apiEndpoint)
+            .then(response => response.json())
+            .then(data => {
+
+                d.getElementById('new-customers').innerHTML = data.customers;
+                d.getElementById('new-customers-sm').innerHTML = data.customers;
+                const customersGrowth = data.customers_growth.toFixed(2);
+                const customersGrowthDiv = d.getElementById('customers-growth');
+                customersGrowthDiv.innerHTML = data.customers_growth.toFixed(2) + "%"
+                if (customersGrowth > 0) {
+                    customersGrowthDiv.parentNode.classList.add('text-success')
+                }
+                else {
+                    customersGrowthDiv.parentNode.classList.add('text-danger')
+                }
+
+
+                d.getElementById('new-events').innerHTML = data.events;
+                d.getElementById('new-events-sm').innerHTML = data.events;
+                const eventsGrowth = data.events_growth.toFixed(2);
+                const eventsGrowthDiv = d.getElementById('events-growth');
+                eventsGrowthDiv.innerHTML = data.events_growth.toFixed(2) + "%"
+                if (eventsGrowth > 0) {
+                    eventsGrowthDiv.parentNode.classList.add('text-success')
+                }
+                else {
+                    eventsGrowthDiv.parentNode.classList.add('text-danger')
+                }
+
+                d.getElementById('revenue').innerHTML = '৳ ' + data.revenue;
+                d.getElementById('revenue-sm').innerHTML = '৳ ' + data.revenue;
+                const revenueGrowth = data.revenue_growth.toFixed(2);
+
+                const revenueGrowthDiv = d.getElementById('revenue-growth');
+
+                revenueGrowthDiv.innerHTML = data.revenue_growth.toFixed(2) + "%"
+                if (revenueGrowth > 0) {
+                    revenueGrowthDiv.parentNode.classList.add('text-success')
+                }
+                else {
+                    revenueGrowthDiv.parentNode.classList.add('text-danger')
+                }
+
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+
+
+    }
+
+    if (d.getElementById('package-splits')) {
+        var apiEndpoint = origin + '/api/package-wise-revenue'
+        fetch(apiEndpoint)
+            .then(response => response.json())
+            .then(data => {
+                // Get the table body element
+                const tableBody = d.getElementById('package-splits');
+
+                // Loop through each data entry and create a table row
+                data.forEach(entry => {
+                    // Create a new table row
+                    const row = document.createElement('tr');
+
+                    // Populate the table row with data
+                    row.innerHTML = `
+                        <th class="text-gray-900" scope="row">${entry.name}</th>
+                        <td class="fw-bolder text-gray-500">${entry.budget}</td>
+                        <td class="fw-bolder text-gray-500">${entry.qty_sold}</td>
+                        <td class="fw-bolder text-gray-500">${entry.expected_revenue}</td>
+                        <td class="fw-bolder text-gray-500">${entry.total_revenue}</td>
+                        <td class="fw-bolder text-gray-500">
+                            <div class="d-flex ${entry.total_revenue >= entry.expected_revenue ? 'text-success' : 'text-danger'}">
+                                ${((entry.total_revenue - entry.expected_revenue) / entry.expected_revenue * 100).toFixed(2)}%
+                            </div>
+                        </td>
+                    `;
+
+                    // Append the table row to the table body
+                    tableBody.appendChild(row);
                 });
-            }
-        });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
     }
 
     if (d.querySelector('.ct-chart-traffic-share')) {

@@ -15,7 +15,8 @@ from rest_framework import generics, authentication, permissions, viewsets
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
-from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 
@@ -573,7 +574,7 @@ class LastYearFinancialSummary(APIView):
     def get_financial_data(self, month, year):
         try:
             ledger = Ledger.objects.get(month=month, year=year)
-            return {'revenue': ledger.revenue, 'profit': ledger.net_profit}
+            return {'revenue': ledger.revenue, 'profit': ledger.net_profit, 'advance_received': ledger.advance_received, 'gross_profit': ledger.gross_profit, 'net_profit': ledger.net_profit}
         except Ledger.DoesNotExist:
             return {'revenue': 0, 'profit': 0}  # Or provide default values
 
@@ -604,13 +605,111 @@ class LastYearFinancialSummary(APIView):
         # Calculate the average growth rate
         average_growth_rate = sum(growth_rates) / len(growth_rates)
 
+        pct_net_profit = (sum([data['net_profit']
+                              for data in financial_data_list])/total_revenue) * 100
+
+        pct_gross_profit = (sum([data['gross_profit']
+                                for data in financial_data_list])/total_revenue) * 100
+
+        pct_ac_receivables = (sum([data['advance_received']
+                                  for data in financial_data_list])/total_revenue) * 100
         response_data = {
             'last_12_months': [i[0] for i in last_12_months][::-1],
             'revenue_list': revenue_list[::-1],
             'profit_list': [data['profit'] for data in financial_data_list][::-1],
             'total_revenue': total_revenue,
-            'average_growth_rate': average_growth_rate
+            'average_growth_rate': average_growth_rate,
+            'advance_list': [data['advance_received'] for data in financial_data_list][::-1],
+            'cash_in_hand': Cash.objects.first().cash,
+            'pct_net_profit': pct_net_profit,
+            'pct_gross_profit': pct_gross_profit,
+            'pct_ac_receivables': pct_ac_receivables,
         }
 
         return Response(response_data)
 
+
+class CurrentMonthTotals(APIView):
+    permission_classes = [permissions.DjangoModelPermissions]
+    authentication_classes = [authentication.SessionAuthentication]
+    queryset = Ledger.objects.all()
+
+    def get(self, request):
+        today = datetime.now()
+
+        # Calculate the start of the current month
+        current_month_start = today.replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        # Calculate the start of the next month using relativedelta
+        next_month_start = current_month_start + relativedelta(months=1)
+
+        previous_month_start = current_month_start - relativedelta(months=1)
+
+        current_total_clients_added = Client.objects.filter(
+            date_added__gte=current_month_start, date_added__lt=next_month_start).count()
+
+        previous_total_clients_added = Client.objects.filter(
+            date_added__gte=previous_month_start, date_added__lt=current_month_start).count()
+
+        client_growth = ((current_total_clients_added -
+                         previous_total_clients_added) / previous_total_clients_added) * 100
+
+        current_total_events = Event.objects.filter(
+            date__gte=current_month_start, date__lt=next_month_start).count()
+
+        previous_total_events = Event.objects.filter(
+            date__gte=previous_month_start, date__lt=current_month_start).count()
+
+        event_growth = (
+            (current_total_events - previous_total_events) / previous_total_events) * 100
+
+        current_total_revenue = self.queryset.get(
+            month=current_month_start.month, year=current_month_start.year).revenue
+
+        previous_total_revenue = self.queryset.get(
+            month=previous_month_start.month, year=previous_month_start.year).revenue
+        revenue_growth = (
+            (current_total_revenue - previous_total_revenue) / previous_total_revenue) * 100
+
+        response_data = {
+            "customers": current_total_clients_added,
+            "customers_growth": client_growth,
+            "events": current_total_events,
+            "events_growth": event_growth,
+            "revenue": current_total_revenue,
+            "revenue_growth": revenue_growth
+        }
+
+        return Response(response_data)
+
+
+class PackageWiseRevenue(APIView):
+    permission_classes = [permissions.DjangoModelPermissions]
+    authentication_classes = [authentication.SessionAuthentication]
+    queryset = Package.objects.all()
+
+    def get(self, request):
+        response_data = []
+        for package in self.queryset.filter(active=True):
+            name = package.name
+            budget = package.budget
+            qty_sold = package.get_qty_sold()
+
+            expected_revenue = budget*qty_sold
+
+            total_revenue = sum([
+                event.get_total_budget() for event in Event.objects.filter(package=package)
+            ])
+
+            data = {
+                "name": name,
+                "budget": budget,
+                "qty_sold": qty_sold,
+                "expected_revenue": expected_revenue,
+                "total_revenue": total_revenue,
+            }
+
+            response_data.append(data)
+
+        return Response(response_data)
