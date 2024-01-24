@@ -26,15 +26,16 @@
             {% if actions_selection_counter %}
             <span class="action-counter" data-actions-icnt="{{ cl.result_list|length }}">{{ selection_note }}</span>
             {% if cl.result_count != cl.result_list|length %}
-            <span class="all">{{ selection_note_all }}</span>
         </div>
-        <div class="text-end">
+        <div class="text-md-end text-start my-xl-0 my-2">
             <span class="question">
                 <a href="#" title="{% trans 'Click here to select the objects across all pages' %}"
                     class="badge bg-primary text-white p-2">{% blocktrans with cl.result_count as total_count %}
                     Select all {{ total_count }} {{ module_name }}{% endblocktrans %}</a>
             </span>
-            <span class="clear ms-2"><small><a href="#" class="text-danger">{% trans "Clear selection"%}</a></small></span>
+            <span class="clear ms-2">
+                <small><a href="#" class="text-mute">{% trans "Clear selection"%}</a></small>
+            </span>
         </div>
     </div>
     {% endif %}

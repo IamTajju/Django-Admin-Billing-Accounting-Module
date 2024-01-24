@@ -19,6 +19,15 @@
 const d = document;
 const origin = window.location.origin
 d.addEventListener("DOMContentLoaded", function (event) {
+    const sidebarMenu = d.getElementById('sidebarMenu');
+    const mainContent = d.querySelector('.content');
+
+    d.getElementById('sideBarToggler').addEventListener('click', function () {
+        sidebarMenu.classList.toggle('d-lg-block');
+        mainContent.classList.toggle('sidebar-open');
+    });
+
+
     const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
             confirmButton: 'btn btn-primary me-3',

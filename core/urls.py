@@ -21,8 +21,8 @@ from .views import redirect_to_root
 
 urlpatterns = [
     path('', views.dashboard, name='root'),
-    path('admin/', redirect_to_root, name='admin_redirect'),
     path('admin/', admin.site.urls),
+    # path('admin/', redirect_to_root, name='admin_redirect'),
     path('volt/', include('admin_volt.urls')),
     path('billing/', include(('billing.urls', 'billing'), namespace='billing')),
     path('api-auth/', include('rest_framework.urls')),
