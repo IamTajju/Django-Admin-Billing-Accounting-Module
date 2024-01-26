@@ -448,8 +448,6 @@ class TeamMemberBillAdminConfig(admin.ModelAdmin):
             return qs
 
         team_member = TeamMember.objects.get(user=user)
-        logging.critical(team_member)
-        logging.critical("lol")
         return qs.filter(team_member=team_member)
 
     def changeform_view(self, request, object_id, form_url, extra_context=None):
@@ -483,7 +481,6 @@ class OutflowAdminConfig(admin.ModelAdmin):
 
     def action(self, obj):
         type = self.type(obj)
-        logging.critical(type)
         if type == "Overhead":
             button_text = "Edit"
             button_class = "btn-outline-primary"

@@ -7,10 +7,12 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["billing.odysseydev.net", "tahzeebahmed.com", "billing.tahzeebahmed.com"]
+ALLOWED_HOSTS = ["billing.odysseydev.net",
+                 "tahzeebahmed.com", "billing.tahzeebahmed.com"]
 
 CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE =  True
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
 
 CONN_MAX_AGE = None
 

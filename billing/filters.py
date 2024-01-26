@@ -74,7 +74,6 @@ class ClientFilter(admin.SimpleListFilter):
             for client in clients:
                 if len(client.get_active_events()) != 0:
                     queryset = queryset.exclude(id=client.id)
-                    logging.critical(queryset)
             return queryset
 
 
