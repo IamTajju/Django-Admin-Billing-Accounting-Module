@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from billing.models import *
+from billing.business_logic.services import create_inflow2bill, edit_inflow2bill
 from user.models import TeamMember
-from billing.admin import *
 from user.models import *
 from .serializers import *
 import logging
@@ -428,13 +428,7 @@ class CashInflowViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         cash_inflow_instance = serializer.save()
-        client = Client.objects.get(id=cash_inflow_instance.source.id)
-        bill_id = client.generate_bill(User.objects.get(id=request.user.id))
-        inflow_bill_instance = InflowToBill(
-            inflow=cash_inflow_instance, bill_id=bill_id)
-        inflow_bill_instance.save()
-        invoice_link = str(request.get_host()) + str(reverse("billing:view-bill", args=[
-            bill_id]))
+        invoice_link = create_inflow2bill(cash_inflow_instance, request)
         return Response({'invoice_link': invoice_link}, status=status.HTTP_202_ACCEPTED)
 
     def update(self, request, *args, **kwargs):
@@ -443,18 +437,9 @@ class CashInflowViewSet(viewsets.ModelViewSet):
             cashinflow, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
-
+        
+        invoice_link = edit_inflow2bill(cashinflow, request)
         serializer.save()
-        client = Client.objects.get(id=cashinflow.source.id)
-        bill_id = client.generate_bill(
-            User.objects.get(id=request.user.id))
-
-        # Needs to be service
-        inflow2bill = InflowToBill.objects.get(inflow=cashinflow.id)
-        inflow2bill.bill = Bill.objects.get(id=bill_id)
-        inflow2bill.save()
-        invoice_link = str(request.get_host()) + str(reverse("billing:view-bill", args=[
-            bill_id]))
         return Response({'invoice_link': invoice_link}, status=status.HTTP_202_ACCEPTED)
 
 

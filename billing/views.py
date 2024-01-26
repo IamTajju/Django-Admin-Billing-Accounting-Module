@@ -7,13 +7,18 @@ from weasyprint import HTML, CSS
 import tempfile
 
 
-def generate_new_bill(request, client_id):
+def generate_new_bill(request, client_id, from_admin=None):
     user = User.objects.get(id=request.user.id)
     client = Client.objects.get(id=client_id)
+    if from_admin:
+        return view_bill(request, client.generate_bill(user), from_admin)
     return view_bill(request, client.generate_bill(user))
 
 
-def view_bill(request, bill_id):
+def view_bill(request, bill_id, from_admin=None):
+    if from_admin:
+        return render(request, "billing/admin-billing-download-view.html", {'bill_id': bill_id})
+   
     bill = Bill.objects.get(id=bill_id)
     # For Direct loading HTML view
     # return render(request, 'billing/bill-pdf.html', {'bill': bill})
@@ -36,5 +41,4 @@ def view_bill(request, bill_id):
         output.flush()
         output = open(output.name, 'rb')
         response.write(output.read())
-
     return response

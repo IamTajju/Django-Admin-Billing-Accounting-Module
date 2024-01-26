@@ -9,7 +9,6 @@ from django.db.models.functions import Coalesce, Cast, Replace
 from billing.helpers import get_prev_month_year
 
 
-
 class Client(models.Model):
     full_name = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=15)
@@ -135,7 +134,7 @@ class Event(models.Model):
         BRIDAL_SHOWER = "BS", _("Bridal Shower")
         BIRTHDAY = "BD", _("Birthday")
         NIKKAH = "N", _("Nikkah")
-        AIBURO_BHAAT = "AB", _("Aiburo Bhaat") 
+        AIBURO_BHAAT = "AB", _("Aiburo Bhaat")
         SANGEET = "S", _("Sangeet")
         BIYE = "B", _("Biye")
         BASIBIYE = "BB", _("Basibiye")
@@ -146,7 +145,7 @@ class Event(models.Model):
         DODHIMANGAL = "DM", _("Dodhimangal")
         FAMILY_GET_TOGETHER = "FGT", _('Family Get Together')
         ANNIVERSARY = "AV", _("Anniversary")
-        COUPLE_SHOOT = "CS", _("Couple Shoot") 
+        COUPLE_SHOOT = "CS", _("Couple Shoot")
         CORPORATE_EVENT = "CE", _("Corporate Event")
         FAMILY_PHOTOGRAPHY = "FP", _("Family Photography")
         PROPOSAL_EVENT = "PE", _("Proposal Event")
@@ -220,8 +219,10 @@ class Event(models.Model):
             (False, Event.PaymentStatus.FULL): Event.EventStatus.CONFIRMED,
         }
 
-        self.payment_status = payment_status_map.get(((self.payment_received < self.get_total_budget()), (self.payment_received == 0)))
-        self.event_status = event_status_map.get(((self.date < datetime.date.today()), self.payment_status))
+        self.payment_status = payment_status_map.get(
+            ((self.payment_received < self.get_total_budget()), (self.payment_received == 0)))
+        self.event_status = event_status_map.get(
+            ((self.date < datetime.date.today()), self.payment_status))
         self.save()
         return self.payment_received
 
@@ -235,14 +236,13 @@ class Event(models.Model):
         conflicts = []
         num_photographers = 0
         num_cinematographers = 0
-        
+
         for team_member_bill in self.get_photographers():
             if team_member_bill.team_member.role == 'P':
                 num_photographers = num_photographers + 1
             if team_member_bill.team_member.role == 'C':
                 num_cinematographers = num_cinematographers + 1
-        
-        
+
         if self.package:
             if self.package.num_photographer < num_photographers:
                 conflicts.append(
@@ -310,9 +310,9 @@ class CashInflow(models.Model):
         # if self.id:
         #     if not self.is_active:
         #         raise Exception("Permanent record. Cannot be changed.")
-            # if self.get_current_state_all_events_budget() < self.amount:
-            #     raise Exception(
-            #         "The new amount is greater than all the associated events' budget combined")
+        # if self.get_current_state_all_events_budget() < self.amount:
+        #     raise Exception(
+        #         "The new amount is greater than all the associated events' budget combined")
 
         # # For new instance only
         # else:
@@ -351,7 +351,8 @@ class Ledger(models.Model):
     @property
     def cash_balance(self):
         date = datetime.date.today()
-        instance_date = datetime.date(self.year, self.month, 1) + datetime.timedelta(days=31)
+        instance_date = datetime.date(
+            self.year, self.month, 1) + datetime.timedelta(days=31)
         if instance_date < date:
             return self.end_balance
         return self.cash.cash
@@ -364,15 +365,14 @@ class Ledger(models.Model):
     def net_profit(self):
         return self.gross_profit - self.expenses
 
-
-    
     def get_ledger_instances_between_now_and_then(self):
         ledger_instances = Ledger.objects.filter(
             year__gte=self.year,
             year__lte=datetime.date.today().year
         ).exclude(
             Q(year=self.year, month__lte=self.month) |
-            Q(year=datetime.date.today().year, month__gte=datetime.date.today().month)
+            Q(year=datetime.date.today().year,
+              month__gte=datetime.date.today().month)
         )
         return ledger_instances
 
@@ -413,7 +413,6 @@ class Ledger(models.Model):
         self.cash_outflow(amount)
         self.cogs = self.cogs + amount
         self.save()
-    
 
     def __str__(self):
         return str(self.month) + "-" + str(self.year)
@@ -426,7 +425,7 @@ class TeamMemberBill(models.Model):
     class Meta:
         verbose_name_plural = "Team member bills"
         # Will work on postgress DB, this is a DB-level action, SQLite doesn't support it
-        #unique_together = ('team_member', 'month', 'year',)
+        # unique_together = ('team_member', 'month', 'year',)
 
     team_member = models.ForeignKey(
         TeamMember, on_delete=models.CASCADE, editable=False)
@@ -441,13 +440,14 @@ class TeamMemberBill(models.Model):
     @property
     def cleared(self):
         try:
-            print(OutflowToTeamMemberBill.objects.get(team_member_bill=self, month=self.month, year=self.year).cleared_amount)
+            print(OutflowToTeamMemberBill.objects.get(
+                team_member_bill=self, month=self.month, year=self.year).cleared_amount)
             if OutflowToTeamMemberBill.objects.get(team_member_bill=self, month=self.month, year=self.year).cleared_amount > 0:
                 return True
             return False
         except:
             return False
-        
+
     def get_total_events(self):
         return len(self.events.all())
 
@@ -528,7 +528,8 @@ class Bill(models.Model):
                 bill=self, package=Package.objects.get(id=package['package']))
             purchase.quantity = package['count']
             for event in package_events:
-                purchase.append_date(event.date, event.get_event_type_display())
+                purchase.append_date(
+                    event.date, event.get_event_type_display())
                 purchase.discount += event.discount
                 purchase.append_leads(event.lead_photographers.all())
 
@@ -549,7 +550,7 @@ class Bill(models.Model):
                 [f"{item['name']}" for item in add_ons])
             # dates field also holds the event_type data, didn't change name because will require migration in production
             custom_purchase = CustomPurchase.objects.create(
-                bill=self, date= f"{custom_event.get_event_type_display()} - {custom_event.date}", details=details, price=price)
+                bill=self, date=f"{custom_event.get_event_type_display()} - {custom_event.date}", details=details, price=price)
             custom_purchase.discount = custom_event.discount
             custom_purchase.leads.set(custom_event.lead_photographers.all())
             custom_purchase.save()
@@ -604,12 +605,13 @@ class Bill(models.Model):
     def is_custom_second(self):
         custom_purchases = self.get_custom_purchase_list()
         standard_purchases = self.get_purchase_list()
-        
+
         if custom_purchases and standard_purchases:
             return custom_purchases[0].first_date > standard_purchases[0].first_date
-        
+
         # Handle cases where either list is empty
         return False
+
     def get_add_ons_list(self):
         return AddOnPurchase.objects.filter(bill=self)
 
@@ -618,7 +620,7 @@ class Purchase(models.Model):
     bill = models.ForeignKey(
         Bill, on_delete=models.CASCADE, null=True, related_name='purchase')
     package = models.ForeignKey(Package, on_delete=models.CASCADE, null=True)
-    # dates field also holds the event_type data, didn't change name because will require migration in production 
+    # dates field also holds the event_type data, didn't change name because will require migration in production
     dates = models.TextField()
     leads = models.ManyToManyField(TeamMember, blank=True)
     discount = models.IntegerField(default=0)
@@ -638,7 +640,7 @@ class Purchase(models.Model):
             print(date_str)
             # Parse the date string into a datetime object
             date = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-            
+
             # Update the earliest_date if it's None or the current date is earlier
             if earliest_date is None or date < earliest_date:
                 earliest_date = date
@@ -649,7 +651,8 @@ class Purchase(models.Model):
             return None
 
     def append_date(self, date, event_type):
-        self.dates = str(event_type) + ' - ' + str(date) if not self.dates else f"{self.dates} & {str(event_type)} - {str(date)}"
+        self.dates = str(event_type) + ' - ' + str(
+            date) if not self.dates else f"{self.dates} & {str(event_type)} - {str(date)}"
 
     def append_leads(self, leads):
         unique_leads = set(leads)
@@ -666,7 +669,6 @@ class CustomPurchase(models.Model):
     price = models.IntegerField()
     discount = discount = models.IntegerField(default=0)
 
-
     @property
     def first_date(self):
         # Split the string by '&' to separate the date parts
@@ -678,10 +680,10 @@ class CustomPurchase(models.Model):
         for date_part in date_parts:
             # Split each date part by '-' to get the date string
             date_str = date_part.split(' - ')[-1].strip()
-            
+
             # Parse the date string into a datetime object
             date = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-            
+
             # Update the earliest_date if it's None or the current date is earlier
             if earliest_date is None or date < earliest_date:
                 earliest_date = date
@@ -711,6 +713,9 @@ class InflowToBill(models.Model):
         CashInflow, on_delete=models.CASCADE)
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self):
+        return f"{self.inflow}"
 
 
 class OutflowToTeamMemberBill(models.Model):

@@ -4,6 +4,7 @@ from billing.models import *
 
 # Helpers
 
+
 def get_instance_ledger(date):
     ledger = ""
     cash = Cash.objects.get(id=settings.CASH_ID)
@@ -17,7 +18,7 @@ def get_instance_ledger(date):
     return ledger
 
 
-#CashOutflow
+# CashOutflow
 
 @receiver(post_save, sender=CashOutflow)
 def add_outflow_to_ledger(sender, instance, **kwargs):
@@ -46,7 +47,7 @@ def remove_previous_outflow_from_ledger(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=CashOutflow)
 def update_outflow2tbill_based_on_payroll(sender, instance, **kwargs):
-    if instance.id is not None:       
+    if instance.id is not None:
         previous_outflow_instance = CashOutflow.objects.get(id=instance.id)
         if previous_outflow_instance.is_payroll:
             team_member = TeamMember.objects.get(
@@ -60,7 +61,6 @@ def update_outflow2tbill_based_on_payroll(sender, instance, **kwargs):
 
             outflow_tbill_instance.cleared_amount = instance.amount
             outflow_tbill_instance.save()
-
 
 
 # TeamMemberBill
@@ -77,10 +77,10 @@ def create_outflow2tbill_and_payroll_instance(sender, instance, created, **kwarg
 def delete_outflow2tbill_and_payroll_instance(sender, instance, **kwargs):
     if instance.id:
         team_member_bill_instance = TeamMemberBill.objects.get(id=instance.id)
-        outflow_tbill_instance = OutflowToTeamMemberBill.objects.get(team_member_bill=team_member_bill_instance, month=team_member_bill_instance.month, year=team_member_bill_instance.year)
-        outflow_tbill_instance.cash_outflow.delete()   
+        outflow_tbill_instance = OutflowToTeamMemberBill.objects.get(
+            team_member_bill=team_member_bill_instance, month=team_member_bill_instance.month, year=team_member_bill_instance.year)
+        outflow_tbill_instance.cash_outflow.delete()
         outflow_tbill_instance.delete()
-
 
 
 # CashInflow
@@ -89,6 +89,7 @@ def delete_outflow2tbill_and_payroll_instance(sender, instance, **kwargs):
 def add_inflow_to_ledger(sender, instance, **kwargs):
     ledger = get_instance_ledger(instance.date)
     ledger.receive_advance(instance.amount)
+
 
 @receiver(pre_save, sender=CashInflow)
 @receiver(pre_delete, sender=CashInflow)
@@ -106,18 +107,19 @@ def delete_inflow2event(sender, instance, **kwargs):
         cash_inflow_instance = CashInflow.objects.get(id=instance.id)
         cash_inflow_instance.remove_inflow_to_event_instances()
 
+
 @receiver(post_save, sender=CashInflow)
 def create_inflow2event(sender, instance, **kwargs):
     instance.source.make_payment(instance)
 
-
-
 # Event
+
 
 @receiver(post_save, sender=Event)
 def add_revenue_to_ledger(sender, instance, **kwargs):
     ledger = get_instance_ledger(instance.date)
     ledger.add_revenue(instance.get_total_budget())
+
 
 @receiver(pre_save, sender=Event)
 @receiver(pre_delete, sender=Event)
@@ -127,9 +129,6 @@ def remove_previous_revenue_to_ledger(sender, instance, **kwargs):
         previous_amount = event.get_total_budget()
         previous_ledger = get_instance_ledger(event.date)
         previous_ledger.add_revenue(-(previous_amount))
-
-
-
 
 
 # Many To Many Relationships being handled here

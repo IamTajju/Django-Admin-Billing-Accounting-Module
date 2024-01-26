@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
 
 
-def redirect_to_root(request):
-    return redirect('/')
+def redirect_to_admin(request):
+    return redirect('/admin')

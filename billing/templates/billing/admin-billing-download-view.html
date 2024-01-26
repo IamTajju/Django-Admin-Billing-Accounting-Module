@@ -1,0 +1,71 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<center>
+    <div style="margin-top: 30vh; margin-bottom: 30vh;" id="downloadLoader">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Please wait...</span>
+        </div>
+        <p>Downloading...</p>
+    </div>
+    <div id="successBox" class="alert alert-success d-none px-5" style="margin-top: 30vh; margin-bottom: 30vh;">
+        <div class="d-block my-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor"
+                class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                <path
+                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+            </svg>
+        </div>
+        <a href="{% url 'admin:billing_event_changelist' %}" class="btn btn-outline-success"><svg
+                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                    d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5" />
+            </svg> View Events Table</a>
+    </div>
+</center>
+<script>
+    // Function to make a GET request and handle the response
+    async function getFile() {
+        try {
+            const response = await fetch("{% url 'billing:view-bill' bill_id %}");
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+
+            // Extract filename from Content-Disposition header
+            const contentDisposition = response.headers.get('Content-Disposition');
+            const filenameStartIndex = contentDisposition.indexOf('=') + 1;
+            const filename = contentDisposition.substring(filenameStartIndex);
+
+            // Create a link element to trigger the automatic download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+
+            // Append the link to the document and trigger the download
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up by removing the link from the document
+            document.body.removeChild(link);
+
+            // Replace loader with a "Go Back" button
+            document.getElementById('downloadLoader').style.display = 'none';
+            document.getElementById('successBox').classList.remove('d-none');
+        } catch (error) {
+            console.error('Error fetching the file:', error);
+            // You may want to handle errors here, e.g., display an error message.
+        }
+    }
+
+    // Call getFile when the page loads
+    getFile();
+</script>
+
+{% endblock content %}

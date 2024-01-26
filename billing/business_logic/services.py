@@ -1,4 +1,6 @@
-from billing.models import Event, InflowToEvent
+from billing.models import Event, Bill, InflowToBill, Client
+from user.models import User
+from django.urls import reverse
 import datetime
 
 class EventServices():
@@ -37,3 +39,31 @@ class EventServices():
 
         event_instance.payment_status = payment_status_map.get(((event_instance.payment_received < total_budget), (event_instance.payment_received == 0)))
         return event_instance
+
+
+
+def create_inflow2bill(cash_inflow_instance, request, from_admin=None):
+    client = Client.objects.get(id=cash_inflow_instance.source.id)
+    bill_id = client.generate_bill(User.objects.get(id=request.user.id))
+    inflow_bill_instance = InflowToBill(
+        inflow=cash_inflow_instance, bill_id=bill_id)
+    inflow_bill_instance.save()
+    invoice_link = str(request.get_host()) + str(reverse("billing:view-bill", args=[
+        bill_id]))
+    if from_admin:
+        return bill_id
+    return invoice_link
+
+def edit_inflow2bill(cash_inflow_instance, request, from_admin=None):
+    client = Client.objects.get(id=cash_inflow_instance.source.id)
+    bill_id = client.generate_bill(
+            User.objects.get(id=request.user.id))
+    inflow2bill = InflowToBill.objects.get(inflow=cash_inflow_instance.id)
+    inflow2bill.bill = Bill.objects.get(id=bill_id)
+    inflow2bill.save()
+    invoice_link = str(request.get_host()) + str(reverse("billing:view-bill", args=[
+        bill_id]))
+    
+    if from_admin:
+        return bill_id
+    return invoice_link

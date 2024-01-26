@@ -5,8 +5,9 @@ class EventValidator():
 
     @classmethod
     def can_edit(cls, event_instance):
-        if event_instance and not event_instance.is_active_event:
-            raise ValueError("Permanent record. Cannot be changed")
+        if event_instance:
+            if not event_instance.is_active_event:
+                raise ValueError("Permanent record. Cannot be changed")
         return True
         
     @classmethod

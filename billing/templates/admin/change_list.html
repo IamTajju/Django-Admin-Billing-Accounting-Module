@@ -3,9 +3,9 @@
 
 {% block extrastyle %}
 {{ block.super }}
-<link rel="stylesheet" type="text/css" href="{% static " admin/css/changelists.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/changelists.css' %}">
 {% if cl.formset %}
-<link rel="stylesheet" type="text/css" href="{% static " css/forms.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/forms.css' %}">
 {% endif %}
 {% if cl.formset or action_form %}
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
@@ -74,7 +74,7 @@
 </div>
 
 <div class="row mx-md-3 mx-0">
-    <div class="{% if cl.has_filters %}col-md-10{% else %}col-md-12{% endif %}">
+    <div class="{% if cl.has_filters %}col-md-9{% else %}col-md-12{% endif %}">
         {% block date_hierarchy %}
         {% if cl.date_hierarchy %}{% date_hierarchy cl %}{% endif %}
         {% endblock %}
@@ -93,24 +93,20 @@
                 {% endif %}
 
                 {% result_list cl %}
-
-                {% if action_form and actions_on_bottom and cl.show_admin_actions %}
-                {% admin_actions %}
-                {% endif %}
                 {% endblock %}
 
                 {% block pagination %}{% pagination cl %}{% endblock %}
             </div>
         </form>
     </div>
-    <div class="col-md-2">
+    <div class="d-md-block col-md-3 d-none">
         {% if cl.has_filters %}
         {% block filters %}
         <div class="card card-body border-0 shadow table-wrapper table-responsive">
-            <div class="card-header filter_card_header">
+            <div class="card-header filter_card_header px-1">
                 <h5>{% trans 'Filter' %}</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body mt-2 px-1">
                 {% for spec in cl.filter_specs %}
                 {% admin_list_filter cl spec %}
                 {% endfor %}
