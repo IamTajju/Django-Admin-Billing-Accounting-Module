@@ -287,13 +287,11 @@ d.addEventListener("DOMContentLoaded", function (event) {
             .catch(error => console.error('Error fetching data:', error));
     }
 
-    if (d.querySelector('.totals-col')) {
+    if (d.querySelector('.admin-total-cols')) {
         var apiEndpoint = origin + '/api/current-month-totals'
-
         fetch(apiEndpoint)
             .then(response => response.json())
             .then(data => {
-
                 d.getElementById('new-customers').innerHTML = data.customers;
                 d.getElementById('new-customers-sm').innerHTML = data.customers;
                 const customersGrowth = data.customers_growth.toFixed(2);
@@ -397,6 +395,52 @@ d.addEventListener("DOMContentLoaded", function (event) {
                 Chartist.plugins.tooltip()
             ],
         });
+    }
+
+    if (d.getElementById('teammember-bill-view')) {
+        var apiEndpoint = origin + '/api/teammemberbills/get_dashboard_data'
+        fetch(apiEndpoint)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                d.getElementById('tmember-events-sm').innerHTML = data.tmember_events;
+                d.getElementById('tmember-events').innerHTML = data.tmember_events;
+                d.getElementById('tmember-prev-events').innerHTML = data.tmember_prev_events;
+                d.getElementById('tmember-revenue-sm').innerHTML = '৳ ' + data.tmember_earnings.toLocaleString();
+                d.getElementById('tmember-revenue').innerHTML = '৳ ' + data.tmember_earnings.toLocaleString();
+                d.getElementById('tmember-claimed').innerHTML = '৳ ' + data.tmember_claimed.toLocaleString();
+
+
+
+                // Get the table body element
+                const tableBody = d.getElementById('teammember-bill-view');
+
+                // Loop through each data entry and create a table row
+                data.recent_events.forEach(entry => {
+                    // Create a new table row
+                    const row = document.createElement('tr');
+
+                    // Populate the table row with data
+                    row.innerHTML = `
+                        <th class="text-gray-900" scope="row">${entry.client_full_name}</th>
+                        <td class="fw-bolder text-gray-500">${entry.event_type_display}</td>
+                        <td class="fw-bolder text-gray-500">${entry.date}</td>
+                        <td class="fw-bolder text-gray-500">${entry.package_name}</td>
+                        <td class="fw-bolder text-gray-500">${entry.venue}</td>
+                        <td class="fw-bolder text-gray-500">
+                          <a class="btn btn-outline-success btn-sm p-1" href=${origin + entry.bill_link}>Download Bill<a>
+                        </td>
+                    `;
+
+                    // Append the table row to the table body
+                    tableBody.appendChild(row);
+                });
+
+
+
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
     }
 
     if (d.getElementById('loadOnClick')) {

@@ -1,5 +1,6 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
+{% load auth_extras %}
 
 {% block content %}
 <hr class="d-lg-block d-none">
@@ -15,6 +16,7 @@
             New Task
         </button>
         <div class="dropdown-menu dashboard-dropdown dropdown-menu-start mt-2 py-1">
+            {% if request.user|has_admin_privilege %}
             <a class="dropdown-item d-flex align-items-center" href="{% url 'admin:billing_client_add' %}">
                 <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg">
@@ -33,10 +35,23 @@
                 </svg>
                 Add Event
             </a>
+            {% else %}
+            <a class="dropdown-item d-flex align-items-center" href="{% url 'admin:billing_teammemberbill_add' %}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-receipt me-1" viewBox="0 0 16 16">
+                    <path
+                        d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27m.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0z" />
+                    <path
+                        d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5" />
+                </svg>
+                Submit Event Bill
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>
 <div class="row">
+    {% if request.user|has_admin_privilege %}
     <div class="col-12 mb-4">
         <div class="card bg-yellow-100 border-0 shadow">
             <div class="card-header d-sm-flex flex-row align-items-center flex-0">
@@ -55,7 +70,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-xl-4 mb-4 totals-col">
+    <div class="col-12 col-sm-6 col-xl-4 mb-4 admin-total-cols">
         <div class="card border-0 shadow">
             <div class="card-body">
                 <div class="row d-block d-xl-flex align-items-center">
@@ -91,7 +106,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-xl-4 mb-4 totals-col">
+    <div class="col-12 col-sm-6 col-xl-4 mb-4 admin-total-cols">
         <div class="card border-0 shadow">
             <div class="card-body">
                 <div class="row d-block d-xl-flex align-items-center">
@@ -128,7 +143,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-xl-4 mb-4 totals-col">
+    <div class="col-12 col-sm-6 col-xl-4 mb-4 admin-total-cols">
         <div class="card border-0 shadow">
             <div class="card-body">
                 <div class="row d-block d-xl-flex align-items-center">
@@ -162,8 +177,82 @@
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="col-12 col-sm-6 col-xl-4 mb-4 tmember-total-cols">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="row d-block d-xl-flex align-items-center">
+                    <div
+                        class="col-12 col-xl-5 text-xl-center mb-3 mb-xl-0 d-flex align-items-center justify-content-xl-center">
+                        <div class="icon-shape icon-shape-secondary rounded me-4 me-sm-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                                class="bi bi-cash-stack icon" viewBox="0 0 16 16">
+                                <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zm7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
+                                <path
+                                    d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2z" />
+                            </svg>
+                        </div>
+                        <div class="d-sm-none">
+                            <h2 class="fw-extrabold h5">Total Earnings</h2>
+                            <h3 class="mb-1" id="tmember-revenue-sm">৳ 0</h3>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-7 px-xl-0">
+                        <div class="d-none d-sm-block">
+                            <h2 class="h6 text-gray-400 mb-0">Total Earnings</h2>
+                            <h3 class="fw-extrabold mb-2" id="tmember-revenue">৳ 0</h3>
+                        </div>
+                        <small class="d-flex align-items-center text-gray-500">
+                            Last Month
+                        </small>
+                        <div class="small d-flex mt-1">
+                            <div class="">Claimed: <span class="fw-bolder" id="tmember-claimed">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-4 mb-4 tmember-total-cols">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="row d-block d-xl-flex align-items-center">
+                    <div
+                        class="col-12 col-xl-5 text-xl-center mb-3 mb-xl-0 d-flex align-items-center justify-content-xl-center">
+                        <div class="icon-shape icon-shape-tertiary rounded me-4 me-sm-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                                class="bi bi-calendar-event-fill" viewBox="0 0 16 16">
+                                <path
+                                    d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2m-3.5-7h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5" />
+                            </svg>
+                        </div>
+                        <div class="d-sm-none">
+                            <h2 class="fw-extrabold h5">Events Covered</h2>
+                            <h3 class="mb-1" id="tmember-events-sm">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-7 px-xl-0">
+                        <div class="d-none d-sm-block">
+                            <h2 class="h6 text-gray-400 mb-0">Events Covered</h2>
+                            <h3 class="fw-extrabold mb-2" id="tmember-events">0</h3>
+                        </div>
+                        <small class="text-gray-500">
+                            Last Month
+                        </small>
+                        <div class="small d-flex mt-1">
+                            <div class="">Month Before: <span class="fw-bolder" id="tmember-prev-events">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 <div class="row">
+    {% if request.user|has_admin_privilege %}
     <div class="col-12 col-xl-8">
         <div class="row">
             <div class="col-12 mb-4">
@@ -272,5 +361,38 @@
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="col-12">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h2 class="fs-5 fw-bold mb-0">Recent Events</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="border-bottom" scope="col">Client Name</th>
+                                    <th class="border-bottom" scope="col">Event Type</th>
+                                    <th class="border-bottom" scope="col">Event Date</th>
+                                    <th class="border-bottom" scope="col">Event Package</th>
+                                    <th class="border-bottom" scope="col">Event Venue</th>
+                                    <th class="border-bottom" scope="col">Download Bill</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teammember-bill-view">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock content %}

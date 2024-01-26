@@ -1,7 +1,5 @@
 from django import forms
-from .models import Client, CashInflow, Event, Package
-import logging
-import datetime
+from .models import Client, CashInflow, Event, Package, TeamMemberBill
 from .business_logic import services, validators
 
 
@@ -31,7 +29,6 @@ class InflowForm(forms.ModelForm):
                     validators.CashInflowValidator(self.cleaned_data, instance)
                 except ValueError as e:
                     raise forms.ValidationError(e)
-
 
 class EventForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

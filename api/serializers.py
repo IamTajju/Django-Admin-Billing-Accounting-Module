@@ -4,6 +4,8 @@ from billing.models import *
 from user.models import *
 from billing.business_logic.validators import *
 from billing.business_logic.services import EventServices
+from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
 
 
 class LoginSerializer(serializers.Serializer):
@@ -53,7 +55,8 @@ class EventSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         # Extract the 'add_ons' data from the validated data
         add_ons_data = validated_data.pop('add_ons', None)
-        lead_photographers_data = validated_data.pop('lead_photographers', None)
+        lead_photographers_data = validated_data.pop(
+            'lead_photographers', None)
 
         # Update the fields of the 'Event' model instance with the validated data
         for key, value in validated_data.items():
@@ -104,3 +107,33 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamMember
         fields = ("__all__")
+
+
+class RecentEventSerializer(serializers.ModelSerializer):
+    client_full_name = serializers.SerializerMethodField()
+    bill_link = serializers.SerializerMethodField()
+    package_name = serializers.SerializerMethodField()
+    event_type_display = serializers.SerializerMethodField()
+
+
+    class Meta:
+        model = Event
+        fields = ['client_full_name', 'date', 'event_type_display',
+                  'venue', 'bill_link', 'package_name']
+
+    def get_client_full_name(self, obj):
+        return obj.client.full_name
+
+    def get_bill_link(self, obj):
+        try:
+            bill_id = Bill.objects.filter(client=obj.client).latest('date').id
+            return reverse("billing:view-bill",
+                           args=[bill_id], current_app="billing")
+        except ObjectDoesNotExist:
+            return None
+
+    def get_package_name(self, obj):
+        return obj.package.name if obj.package else "One-Time Custom Package"
+    
+    def get_event_type_display(self,obj):
+        return obj.get_event_type_display()

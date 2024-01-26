@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import secrets
 from django.contrib import auth
 from pathlib import Path
 import os
@@ -22,19 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!21z8ymn%!m9-pqb*z4-q)2e_qh#o&g*%()vmtv^9rjd0r9v)1'
-# SECRET_KEY = os.environ.get(
-#     "DJANGO_SECRET_KEY",
-#     default=secrets.token_urlsafe(nbytes=64),
-# )
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
-
-# Application definition
 
 INSTALLED_APPS = [
     'api',
@@ -100,11 +87,6 @@ DATABASES = {
     }
 }
 
-
-# DATABASES = {
-#     'default': dj_database_url.config(default='postgres://ictqztlquonfml:35f484b110665aaebfb1dd036bb895aa08ac77845bf9a2bce7c9fffedcf2ed1d@ec2-35-169-9-79.compute-1.amazonaws.com:5432/d6mj0q88gemp9k')
-# }
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -167,18 +149,6 @@ REST_FRAMEWORK = {
     ]
 }
 
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://billing.odysseydev.net',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:8000',
-]
-
-CORS_ALLOWED_ORIGINS = [
-    'https://billing.odysseydev.net',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:8000',
-]
 
 
 CORS_ALLOW_CREDENTIALS = True

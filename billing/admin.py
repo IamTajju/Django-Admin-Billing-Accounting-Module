@@ -290,6 +290,23 @@ class EventAdminConfig(admin.ModelAdmin):
             )
             return HttpResponseRedirect(redirect_url)
 
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+
+        # Use a set to keep track of the columns
+        existing_columns = set(list_display)
+
+        # Columns to add conditionally
+        conditional_columns = ['discount', 'discounted_budget',
+                               'payment_received', 'payment_status_badge']
+
+        # Check if each column is already in the list_display and if the condition is met
+        for column in conditional_columns:
+            if column in existing_columns and user_belongs_to_group(request.user, 'Team Members'):
+                list_display.remove(column)
+
+        return list_display
+
 
 class InflowAdminConfig(admin.ModelAdmin):
     form = InflowForm

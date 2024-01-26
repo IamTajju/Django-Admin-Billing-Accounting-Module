@@ -68,14 +68,11 @@
       <li
         class="nav-item {% if 'bootstrap-tables' in segment or model.url in request.path|urlencode %}active{% endif %}">
         <a class="nav-link" href="{{ model.url }}">
-          <!-- <span class="sidebar-icon">
-            <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd"
-                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                clip-rule="evenodd"></path>
-            </svg>
-          </span> -->
-          <span class="sidebar-text">{{ model.label }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-circle"
+            viewBox="0 0 16 16">
+            <circle cx="8" cy="8" r="8" />
+          </svg>
+          <span class="sidebar-text ms-3">{{ model.label }}</span>
         </a>
       </li>
       {% endfor %}

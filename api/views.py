@@ -15,8 +15,9 @@ from rest_framework import generics, authentication, permissions, viewsets
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from django.core.exceptions import ObjectDoesNotExist
 
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 
@@ -409,6 +410,51 @@ class TeamMemberBillViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['get'])
+    def get_dashboard_data(self, request):
+        response_data = {"tmember_events": 0, "tmember_earnings": 0,
+                         "tmember_claimed": 0, "tmember_prev_events": 0, "recent_events": []}
+        try:
+            member = TeamMember.objects.get(user=request.user)
+            prev_month, prev_year = get_prev_month_year()
+            tbill = TeamMemberBill.objects.get(
+                team_member=member, month=prev_month, year=prev_year)
+
+            num_of_events = tbill.get_total_events()
+
+            penult_date = date(prev_year, prev_month, 1) - \
+                relativedelta(months=1)
+            try:
+                penult_tbill = TeamMemberBill.objects.get(
+                    team_member=member, month=penult_date.month, year=penult_date.year)
+                prev_num_of_events = penult_tbill.get_total_events()
+            except ObjectDoesNotExist:
+                prev_num_of_events = 0
+
+            total_earnings = OutflowToTeamMemberBill.objects.get(
+                team_member_bill=tbill, month=tbill.month, year=tbill.year).cleared_amount if tbill.cleared else 0
+
+            start_of_month = date(datetime.now().year, datetime.now().month, 1)
+            next_month = start_of_month + relativedelta(months=1)
+
+            recent_events = Event.objects.filter(
+                date__gt=start_of_month, date__lte=next_month).order_by('-date')
+
+            recent_events_serialized = RecentEventSerializer(
+                recent_events, many=True)
+            recent_events_serialized = recent_events_serialized.data
+
+            response_data["tmember_events"] = num_of_events
+            response_data["tmember_earnings"] = total_earnings
+            response_data["tmember_claimed"] = tbill.get_total_bill()
+            response_data["tmember_prev_events"] = prev_num_of_events
+            response_data["recent_events"] = recent_events_serialized
+
+        except ObjectDoesNotExist:
+            logging.critical("Previous Month Team Member Doesn't Exist.")
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.DjangoModelPermissions]
@@ -437,7 +483,7 @@ class CashInflowViewSet(viewsets.ModelViewSet):
             cashinflow, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
-        
+
         invoice_link = edit_inflow2bill(cashinflow, request)
         serializer.save()
         return Response({'invoice_link': invoice_link}, status=status.HTTP_202_ACCEPTED)
