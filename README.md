@@ -56,37 +56,38 @@ To set up the project, follow these steps:
 2. Install dependencies from `requirements.txt`.
 
 ## Project Structure
+
 < PROJECT ROOT >
    |
    |-- core/
-   |    |-- settings/            # Common Project Configuration
-   |        |-- base.py          # Common Project Configuration
-	 |        |-- dev.py           # Development Configuration
-	 |        |-- prod.py          # Production Configuration
-   |    |-- urls.py              # Project Routing
+   |    |-- settings/
+   |        |-- base.py             # Common Project Configuration
+   |        |-- dev.py              # Development Configuration
+   |        |-- prod.py             # Production Configuration
+   |    |-- urls.py                 # Project Routing
    |
-   |-- Billing/                  # Modular Logic for Accounting & Invoice generation
-   |    |-- views.py             # APP Views for bill generation
-   |    |-- urls.py              # APP Routing
-   |    |-- models.py            # APP Models
-   |    |-- signals.py           # Model Signals 
-   |    |-- tests.py             # Tests
-   |    |-- templates/           # Theme Customisation
-   |    |-- admin.py             # Admin Panel Customisation
-   |    |-- business_logic/      # Single source of custom validation
+   |-- Billing/                     # Modular Logic for Accounting & Invoice generation
+   |    |-- views.py                     # APP Views for bill generation
+   |    |-- urls.py                      # APP Routing
+   |    |-- models.py                    # APP Models
+   |    |-- signals.py                   # Model Signals 
+   |    |-- tests.py                     # Tests
+   |    |-- templates/                   # Theme Customisation
+   |    |-- admin.py                     # Admin Panel Customisation
+   |    |-- business_logic/              # Single source of custom validation
    |
    |-- api/
-   |    |-- views.py             # Api Views
-   |    |-- urls.py              # Api Endpoints
+   |    |-- views.py                     # Api Views
+   |    |-- urls.py                      # Api Endpoints
    |
-   |-- user/                     # Modular Logic for User Management
-   |    |-- views.py             # Api Views
-   |    |-- urls.py              # Api Endpoints
+   |-- user/                       # Modular Logic for User Management
+   |    |-- views.py                     # Api Views
+   |    |-- urls.py                      # Api Endpoints
    |
-   |-- requirements.txt           # Project Dependencies
+   |-- requirements.txt                  # Project Dependencies
    |
-   |-- manage.py                  # Start the app - Django default start script
-   |
+   |-- manage.py                         # Start the app - Django default start script
+
 
 
 ## Usage
