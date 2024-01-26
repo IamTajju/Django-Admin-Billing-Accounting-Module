@@ -5,6 +5,8 @@ Brotli==1.0.9
 CacheControl==0.12.11
 cachetools==5.3.1
 cachy==0.3.0
+cairocffi==1.6.1
+CairoSVG==2.7.1
 certifi==2022.9.24
 cffi==1.15.1
 charset-normalizer==2.1.1
