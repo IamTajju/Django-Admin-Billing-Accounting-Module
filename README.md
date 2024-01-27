@@ -56,7 +56,7 @@ To set up the project, follow these steps:
 2. Install dependencies from `requirements.txt`.
 
 ## Project Structure
-
+```
 < PROJECT ROOT >
    |
    |-- core/
@@ -87,6 +87,7 @@ To set up the project, follow these steps:
    |-- requirements.txt                  # Project Dependencies
    |
    |-- manage.py                         # Start the app - Django default start script
+```
 
 
 
