@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'api',
     'user',
     'billing',
+    'compressor',
     'admin_volt.apps.AdminVoltConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -79,6 +80,7 @@ CASH_ID = 1
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+COMPRESS_ENABLED = True
 
 DATABASES = {
     "default": {
