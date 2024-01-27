@@ -31,10 +31,10 @@ def view_bill(request, bill_id, from_admin=None):
         'billing/bill-pdf.html', {'bill': bill, 'user': str(bill.user)})
 
     html = HTML(string=html_string, base_url=request.build_absolute_uri())
-    CSS(settings.STATIC_ROOT + '/billing/css/bootstrap.min.css')
-    # result = html.write_pdf(presentational_hints=True, stylesheets=[CSS("https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css")])
-    result = html.write_pdf(presentational_hints=True, stylesheets=[
-                            CSS(settings.STATIC_ROOT + '/billing/css/bootstrap.min.css')])
+    # CSS(settings.STATIC_ROOT + '/billing/css/bootstrap.min.css')
+    result = html.write_pdf(presentational_hints=True, stylesheets=[CSS("https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css")])
+    # result = html.write_pdf(presentational_hints=True, stylesheets=[
+    #                         CSS(settings.STATIC_ROOT + '/billing/css/bootstrap.min.css')])
 
     with tempfile.NamedTemporaryFile(delete=True) as output:
         output.write(result)
