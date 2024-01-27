@@ -1,20 +1,5 @@
 # Billing & Accounting Module
 
-### User Account Credentials
-
-- **Admin User role:**
-  - Username: admin_1
-  - Password: KMb&2Uq&n99P
-
-- **Team Member User role:**
-  - Username: team_member_1
-  - Password: qwertyCM12
-
-## Live Demo
-
-- [Billing Demo](https://billing.tahzeebahmed.com)
-- [API Access](https://billing.tahzeebahmed.com/api/)
-
 ## Screenshots
 
 ![Screenshot 1](/demo/screenshots/desktop-dashboard.png)
