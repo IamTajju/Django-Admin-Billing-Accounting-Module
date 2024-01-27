@@ -44,7 +44,7 @@ const d = document;
 const origin = window.location.origin
 d.addEventListener("DOMContentLoaded", function (event) {
     const sidebarMenu = d.getElementById('sidebarMenu');
-    const mainContent = d.querySelector('.content');
+    const mainContent = d.querySelector('.main-content');
 
     d.getElementById('sideBarToggler').addEventListener('click', function () {
         sidebarMenu.classList.toggle('d-lg-block');
