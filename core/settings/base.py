@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.AutoLoginMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -167,3 +168,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'build', 'media')
 LOGIN_REDIRECT_URL = '/'
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEMO_USERNAME = 'demo_user'
+DEMO_PASSWORD = 'demo_password'
