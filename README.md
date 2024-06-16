@@ -39,6 +39,7 @@ To set up the project, follow these steps:
 
 1. Clone the repository.
 2. Install dependencies from `requirements.txt`.
+3. Run python manage.py runserver.
 
 ## Project Structure
 ```
