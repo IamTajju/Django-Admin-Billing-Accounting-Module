@@ -46,10 +46,20 @@ d.addEventListener("DOMContentLoaded", function (event) {
     const sidebarMenu = d.getElementById('sidebarMenu');
     const mainContent = d.querySelector('.main-content');
 
+    // References to chart instances
+    let salesValueChart, rankingChart, trafficShareChart;
+
     d.getElementById('sideBarToggler').addEventListener('click', function () {
         sidebarMenu.classList.toggle('d-lg-block');
         mainContent.classList.toggle('sidebar-open');
+        setTimeout(redrawCharts, 300);
     });
+
+    function redrawCharts() {
+        if (salesValueChart) salesValueChart.update();
+        if (rankingChart) rankingChart.update();
+        if (trafficShareChart) trafficShareChart.update();
+    }
 
 
     const swalWithBootstrapButtons = Swal.mixin({
@@ -207,7 +217,7 @@ d.addEventListener("DOMContentLoaded", function (event) {
         fetch(apiEndpoint)
             .then(response => response.json())
             .then(data => {
-                new Chartist.Line('.ct-chart-sales-value', {
+                salesValueChart = new Chartist.Line('.ct-chart-sales-value', {
                     labels: data.last_12_months,
                     series: [
                         data.revenue_list,
@@ -239,7 +249,7 @@ d.addEventListener("DOMContentLoaded", function (event) {
 
                 if (d.querySelector('.ct-chart-ranking')) {
 
-                    var chart = new Chartist.Bar('.ct-chart-ranking', {
+                    rankingChart = new Chartist.Bar('.ct-chart-ranking', {
                         labels: data.last_12_months,
                         series: [
                             data.revenue_list,
@@ -263,7 +273,7 @@ d.addEventListener("DOMContentLoaded", function (event) {
                         }
                     });
 
-                    chart.on('draw', function (data) {
+                    rankingChart.on('draw', function (data) {
                         if (data.type === 'line' || data.type === 'area') {
                             data.element.animate({
                                 d: {
@@ -380,7 +390,7 @@ d.addEventListener("DOMContentLoaded", function (event) {
 
         var sum = function (a, b) { return a + b };
 
-        new Chartist.Pie('.ct-chart-traffic-share', data, {
+        trafficShareChart = new Chartist.Pie('.ct-chart-traffic-share', data, {
             labelInterpolationFnc: function (value) {
                 return Math.round(value / data.series.reduce(sum) * 100) + '%';
             },

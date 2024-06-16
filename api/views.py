@@ -607,10 +607,10 @@ class LastYearFinancialSummary(APIView):
             ledger = Ledger.objects.get(month=month, year=year)
             return {'revenue': ledger.revenue, 'profit': ledger.net_profit, 'advance_received': ledger.advance_received, 'gross_profit': ledger.gross_profit, 'net_profit': ledger.net_profit}
         except Ledger.DoesNotExist:
-            return {'revenue': 0, 'profit': 0}  # Or provide default values
+            # Or provide default values
+            return {'revenue': 0, 'profit': 0,  'advance_received': 0, 'gross_profit': 0, 'net_profit': 0}
 
     def get(self, request):
-
         current_month = datetime.now().month
         current_year = datetime.now().year
 
@@ -630,20 +630,30 @@ class LastYearFinancialSummary(APIView):
                         for data in financial_data_list]
         total_revenue = sum(revenue_list)
 
-        growth_rates = [(revenue_list[i] - revenue_list[i - 1]) /
-                        revenue_list[i - 1] * 100 for i in range(1, len(revenue_list))]
+        growth_rates = [(0 if revenue_list[i - 1] == 0 else (revenue_list[i] - revenue_list[i - 1]) /
+                        revenue_list[i - 1] * 100) for i in range(1, len(revenue_list))]
 
         # Calculate the average growth rate
         average_growth_rate = sum(growth_rates) / len(growth_rates)
 
-        pct_net_profit = (sum([data['net_profit']
-                              for data in financial_data_list])/total_revenue) * 100
+        try:
+            pct_net_profit = (sum([data['net_profit']
+                                   for data in financial_data_list])/total_revenue) * 100
+        except ZeroDivisionError:
+            pct_net_profit = 0
 
-        pct_gross_profit = (sum([data['gross_profit']
-                                for data in financial_data_list])/total_revenue) * 100
+        try:
+            pct_gross_profit = (sum([data['gross_profit']
+                                    for data in financial_data_list])/total_revenue) * 100
+        except ZeroDivisionError:
+            pct_gross_profit = 0
 
-        pct_ac_receivables = (sum([data['advance_received']
-                                  for data in financial_data_list])/total_revenue) * 100
+        try:
+            pct_ac_receivables = (sum([data['advance_received']
+                                       for data in financial_data_list])/total_revenue) * 100
+        except ZeroDivisionError:
+            pct_ac_receivables = 0
+
         response_data = {
             'last_12_months': [i[0] for i in last_12_months][::-1],
             'revenue_list': revenue_list[::-1],
@@ -683,8 +693,11 @@ class CurrentMonthTotals(APIView):
         previous_total_clients_added = Client.objects.filter(
             date_added__gte=previous_month_start, date_added__lt=current_month_start).count()
 
-        client_growth = ((current_total_clients_added -
-                         previous_total_clients_added) / previous_total_clients_added) * 100
+        try:
+            client_growth = ((current_total_clients_added -
+                              previous_total_clients_added) / previous_total_clients_added) * 100
+        except ZeroDivisionError:
+            client_growth = 0
 
         current_total_events = Event.objects.filter(
             date__gte=current_month_start, date__lt=next_month_start).count()
@@ -692,16 +705,29 @@ class CurrentMonthTotals(APIView):
         previous_total_events = Event.objects.filter(
             date__gte=previous_month_start, date__lt=current_month_start).count()
 
-        event_growth = (
-            (current_total_events - previous_total_events) / previous_total_events) * 100
+        try:
+            event_growth = (
+                (current_total_events - previous_total_events) / previous_total_events) * 100
+        except ZeroDivisionError:
+            event_growth = 0
 
-        current_total_revenue = self.queryset.get(
-            month=current_month_start.month, year=current_month_start.year).revenue
+        try:
+            current_total_revenue = self.queryset.get(
+                month=current_month_start.month, year=current_month_start.year).revenue
+        except ObjectDoesNotExist:
+            current_total_revenue = 0
 
-        previous_total_revenue = self.queryset.get(
-            month=previous_month_start.month, year=previous_month_start.year).revenue
-        revenue_growth = (
-            (current_total_revenue - previous_total_revenue) / previous_total_revenue) * 100
+        try:
+            previous_total_revenue = self.queryset.get(
+                month=previous_month_start.month, year=previous_month_start.year).revenue
+        except:
+            previous_total_revenue = 0
+
+        try:
+            revenue_growth = (
+                (current_total_revenue - previous_total_revenue) / previous_total_revenue) * 100
+        except ZeroDivisionError:
+            revenue_growth = 0
 
         response_data = {
             "customers": current_total_clients_added,

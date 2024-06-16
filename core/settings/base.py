@@ -134,6 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRONJOBS = [
     ('59 23 * * *', 'billing.cron.update_event_status'),
     ('* * 1 * *', 'billing.cron.create_new_ledger'),
+    ('* * 1 * *', 'billing.cron.update_dummy_data'),
 ]
 
 
